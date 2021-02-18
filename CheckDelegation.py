@@ -5,9 +5,16 @@ base = 'https://cardano-mainnet.blockfrost.io/api/v0/'
 pool_id = 'pool_id_here'
 
 def CheckUserStatus(addr):
+    """
+    addr - String - This is any public address associated with a stake key.
+    
+    This checks if a public addressed is delegated to a pool id in some epoch.
+    
+    This returns the stake address, the amount staked, and a boolean flag.
+    """
+    # Default values.
     verified = False
     amt_ada = 0
-    # Base URL
     # get the current epoch number
     last_epoch = 'epochs/latest'
     last_epoch_resp = requests.get(base+last_epoch, headers=headers)
@@ -20,6 +27,7 @@ def CheckUserStatus(addr):
     # Get current delegators to pool and cross reference
     stake_distribution = "epochs/{}/stakes/{}".format(epoch_no, pool_id)
     stake_distro_resp = requests.get(base+stake_distribution, headers=headers)
+    # Cross check the stake address with current delegations.
     for stake in stake_distro_resp.json():
         if stake['stake_address'] == stake_address:
             amt_ada = int(stake['amount'])/1000000
