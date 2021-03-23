@@ -14,10 +14,8 @@ An  analysis  of  Uniswap  markets. 2019.
 arXiv: https://arxiv.org/abs/1911.03380
 
 """
-import random
 from random import randint, uniform
 from itertools import combinations
-import matplotlib.pyplot as plt
 
 
 def evolve(Ra, Da, Rb, Db):
@@ -64,7 +62,7 @@ def get_market_prices(tokens, reserves):
     return prices
 
 
-def simulation(nTokens, gamma, transactions,plot=False):
+def simulation(nTokens, gamma, transactions):
     """
     Run a market simulation of nTokens with a gamma fee for t transactions.
     """
@@ -98,13 +96,8 @@ def simulation(nTokens, gamma, transactions,plot=False):
         print('Market Prices After Trade')
         print(market_price)
 
-        # Plot if want
-        if plot is True:
-            plt.scatter(t, market_price[0][1], c='k')
-    plt.show()
-
 if __name__ == "__main__":
     gamma = 1 # feeless
     nTokens = 3
     transactions = 3
-    simulation(nTokens, gamma, transactions, plot=False)
+    simulation(nTokens, gamma, transactions)
