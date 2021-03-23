@@ -1,5 +1,5 @@
 """
-p2p automated market marker
+p2p automated market maker
 """
 import random
 import itertools
