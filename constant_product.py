@@ -60,6 +60,10 @@ def get_market_prices(tokens, reserves):
         # Get price for both directions.
         prices[pair[0]][pair[1]] = market_price
         prices[pair[1]][pair[0]] = 1/market_price
+    print('Market Prices')
+    print(prices[5][8])
+    # for mp in prices:
+    #     print(mp, prices[mp])
     return prices
 
 
@@ -87,12 +91,13 @@ def simulation(nTokens, gamma, transactions):
     maximum = pow(10,7)
     reserves = [randint(minimum, maximum) for _ in range(nTokens)]
     tokens = [i for i in range(nTokens)]
-    print('\nToken Labels {}'.format(tokens))
-    print('Liquidity Pools {}'.format(reserves))
-    print('Transaction Fee {}'.format(1-gamma))
+    # print('\nToken Labels {}'.format(tokens))
+    # print('Liquidity Pools {}'.format(reserves))
+    # print('Transaction Fee {}\n'.format(1-gamma))
 
     # The number of transactions
     for _ in range(transactions):
+        # print('Transaction Occuring')
         weights = get_weights(reserves)
         # Randon select two tokens
         tokenA, tokenB = select_token_pair(reserves)
@@ -101,24 +106,22 @@ def simulation(nTokens, gamma, transactions):
 
         # # random select delta A and calculate delta B
         deltaA = uniform(0, 100)
-        print('\nTrading {} of Token {} for Token {}'.format(deltaA, tokenA, tokenB))
+        print('\nTrading Token {} for Token {}'.format(tokenA, tokenB))
         k = product(reserves, weights,-1,-1)
-        kr = product(reserves, weights,tokenA,tokenB)
-        # caluclate_amount(x, a, b, g, k, c, w1, w2)
+        kr = product(reserves, weights, tokenA, tokenB)
         deltaB = caluclate_amount(deltaA, reserveA, reserveB, gamma, k, kr, weights[tokenA], weights[tokenB])
-        print('Paying {} of Token {}'.format(deltaB, tokenB))
+        # print('Paying {} of Token {}'.format(deltaB, tokenB))
 
         # # Update Reserve
         reserveA, reserveB = evolve(reserveA, deltaA, reserveB, deltaB)
         reserves[tokenA] = reserveA
         reserves[tokenB] = reserveB
-        market_price = get_market_prices(tokens, reserves)
-        print('Market Prices After Trade')
-        print(market_price)
+        get_market_prices(tokens, reserves)
+        
         # print(market_price[0][1])
 
 if __name__ == "__main__":
-    gamma = 1 # feeless
-    nTokens = 3
-    transactions = 3
+    gamma = 0.01 # feeless
+    nTokens = 10
+    transactions = 300000
     simulation(nTokens, gamma, transactions)
