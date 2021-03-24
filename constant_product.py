@@ -27,12 +27,13 @@ def evolve(Ra, Da, Rb, Db):
     return Ra, Rb
 
 
-def caluclate_amount(X, a, b, g):
+def caluclate_amount(x, a, b, g, k, c, w1, w2):
     """
     See the simple calculation section.
     https://ancientkraken.gitbook.io/simple-amm/
     """
-    return -(b*X) / (g*(X-a))
+    func = (-b + ((k*(a - x)**(-w1))/c)**(1/(w2)))/g
+    return func
 
 
 def select_token_pair(reserves):
@@ -62,12 +63,28 @@ def get_market_prices(tokens, reserves):
     return prices
 
 
+def product(reserves, weights, A, B):
+    value = 1
+    c = 0
+    for r, w in zip(reserves, weights):
+        if c != A and c != B:
+            value *= pow(r, w)
+        c += 1
+    return value
+
+def get_weights(reserves):
+    weights = []
+    total = sum(reserves)
+    for r in reserves:
+        weights.append(r/total)
+    return weights
+
 def simulation(nTokens, gamma, transactions):
     """
     Run a market simulation of nTokens with a gamma fee for t transactions.
     """
-    minimum = 2.5*pow(10,7)
-    maximum = 10*pow(10,7)
+    minimum = pow(10,6)
+    maximum = pow(10,7)
     reserves = [randint(minimum, maximum) for _ in range(nTokens)]
     tokens = [i for i in range(nTokens)]
     print('\nToken Labels {}'.format(tokens))
@@ -75,26 +92,30 @@ def simulation(nTokens, gamma, transactions):
     print('Transaction Fee {}'.format(1-gamma))
 
     # The number of transactions
-    for t in range(transactions):
-
+    for _ in range(transactions):
+        weights = get_weights(reserves)
         # Randon select two tokens
         tokenA, tokenB = select_token_pair(reserves)
         reserveA = reserves[tokenA]
         reserveB = reserves[tokenB]
 
-        # random select delta A and calculate delta B
-        deltaA = uniform(0, 1000)
+        # # random select delta A and calculate delta B
+        deltaA = uniform(0, 100)
         print('\nTrading {} of Token {} for Token {}'.format(deltaA, tokenA, tokenB))
-        deltaB = caluclate_amount(deltaA, reserveA, reserveB, gamma)
+        k = product(reserves, weights,-1,-1)
+        kr = product(reserves, weights,tokenA,tokenB)
+        # caluclate_amount(x, a, b, g, k, c, w1, w2)
+        deltaB = caluclate_amount(deltaA, reserveA, reserveB, gamma, k, kr, weights[tokenA], weights[tokenB])
         print('Paying {} of Token {}'.format(deltaB, tokenB))
 
-        # Update Reserve
+        # # Update Reserve
         reserveA, reserveB = evolve(reserveA, deltaA, reserveB, deltaB)
         reserves[tokenA] = reserveA
         reserves[tokenB] = reserveB
         market_price = get_market_prices(tokens, reserves)
         print('Market Prices After Trade')
         print(market_price)
+        # print(market_price[0][1])
 
 if __name__ == "__main__":
     gamma = 1 # feeless
